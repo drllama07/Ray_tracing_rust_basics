@@ -8,7 +8,7 @@ pub mod online;
 
 fn user_input(user: &str) -> (usize, usize) {
         if user == "you" {
-            println!("Type the location(0-> initial to 2 for the both numbers): ");
+            println!("Type the location(0(initial) to 2(last) for the both numbers): ");
             let mut inputx = String::new();
             stdin().read_line(&mut inputx).unwrap();
             let my_x: usize = inputx.trim().parse().expect("parsing error");
@@ -19,7 +19,7 @@ fn user_input(user: &str) -> (usize, usize) {
             let _ = client(&my_x,&my_y);
             (my_x, my_y)
         } else if user == "it" {
-            println!("Waiting for the other user --> ");
+            println!("Waiting for the other user <- ");
 
             let (it_x,it_y) = server();
 
@@ -40,7 +40,9 @@ fn graphics(game:&[[&str; 3];3 ]) {
         println!("{a}")
 
     }
+    println!("");
     println!("________-________");
+    println!("");
 }
 
 
@@ -55,7 +57,7 @@ fn main() {
     let mut turn: &str = "you";
     let mut player: &str = "X";
     let mut input = String::new();
-    println!("Are you Player_X (1) or Player_O (2)? type 1 or 2:");
+    println!("Are you Player_X (1) or Player_O (2)/type 1 or 2:");
     println!("!!! Make sure Player_O is online before Player_1 for technical reasons !!! ");
     stdout().flush().unwrap(); 
     stdin().read_line(&mut input).unwrap();
@@ -91,7 +93,7 @@ fn main() {
                 }
             }
             else {
-               println!("This invalid move {row} and {col} is occupied");
+               println!("This is invalid move, {row} and {col} is occupied");
             }
             win = winner_gets_the_dinner(&game);
             if win == "NO_WINNER" {
@@ -100,40 +102,15 @@ fn main() {
             }
             else{
                graphics(&game);
-               println!("This match's winner is {win}");
+               println!("This match's winner is Player_{win}");
                break
             }
             
     }
     if win == "NO_WINNER" {
-        println!("This match has $NO_WINNERS, its a t-i-e. :( ");
+        println!("This match has $NO_WINNERS, its a t-i-e :( ");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -157,7 +134,7 @@ fn winner_gets_the_dinner<'a>(game: &'a [[&str;3];3]) -> &'a str {
           game[1][1]
        } else if game[2][2] != "_" && game[2][2] == game[2][0] && game[2][2] == game[2][1] && game[2][2] != "_" {
          game[2][2]
-       } else if game[2][2] != "_" && game[2][2] == game[0][2] && game[2][2] == game[2][1] {
+       } else if game[2][2] != "_" && game[2][2] == game[0][2] && game[2][2] == game[1][2] {
          game[2][2]
        } else {
          "NO_WINNER"

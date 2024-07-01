@@ -13,7 +13,8 @@ use std::{
 pub fn server()-> (usize, usize) {
     thread::sleep(Duration::from_secs(2));
     // this ensures that two cennections dont interrupt each other while changing tasks
-    println!("Started to listen-->");
+    println!("Started to listen at 127.0.0.1:7878 <-");
+    println!("");
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     let mut my_x: usize = 3;
     let mut my_y: usize = 3;
@@ -36,7 +37,8 @@ pub fn server()-> (usize, usize) {
 
 pub fn client(my_x: &usize, my_y: &usize) -> Result<(), Error> {
     let mut stream = TcpStream::connect("127.0.0.1:7878")?;
-    println!("Sending data_>");
+    println!("Sending data to 127.0.0.1:7878 ->");
+    println!("");
 
     // Convert usize values to bytes
     let my_x_bytes = my_x.to_be_bytes();
