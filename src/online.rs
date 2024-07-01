@@ -1,4 +1,5 @@
 use std::{
+    net,
     io::Error,
     io::prelude::*,
     net::{TcpListener, TcpStream},
@@ -10,10 +11,10 @@ use std::{
 
 
 pub fn server()-> (usize, usize) {
-    thread::sleep(Duration::from_secs(5));
+    thread::sleep(Duration::from_secs(2));
     // this ensures that two cennections dont interrupt each other while changing tasks
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     println!("Started to listen-->");
+    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     let mut my_x: usize = 3;
     let mut my_y: usize = 3;
     for stream in listener.incoming() {
@@ -26,7 +27,7 @@ pub fn server()-> (usize, usize) {
         // Convert bytes to usize values
         my_x = usize::from_be_bytes(buffer[0..8].try_into().unwrap());
         my_y = usize::from_be_bytes(buffer[8..16].try_into().unwrap());
-        if my_x > 0 && my_y < 2  {
+        if my_x <= 2 && my_y <= 2  {
             break;
         }   
     }
@@ -45,10 +46,10 @@ pub fn client(my_x: &usize, my_y: &usize) -> Result<(), Error> {
     let mut buffer = Vec::new();
     buffer.extend_from_slice(&my_x_bytes);
     buffer.extend_from_slice(&my_y_bytes);
-
     // Send the buffer to the server
     stream.write_all(&buffer)?;
     
+    stream.shutdown(net::Shutdown::Both).unwrap();
 
     
     Ok(())

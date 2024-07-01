@@ -18,12 +18,14 @@ fn user_input(user: &str) -> (usize, usize) {
             let my_y: usize = inputy.trim().parse().expect("parsing error");
             let _ = client(&my_x,&my_y);
             (my_x, my_y)
-        } else {
+        } else if user == "it" {
             println!("Waiting for the other user --> ");
 
             let (it_x,it_y) = server();
 
             (it_x,it_y)
+        } else {
+            (10,10)
         }
 }
 
@@ -53,8 +55,8 @@ fn main() {
     let mut turn: &str = "you";
     let mut player: &str = "X";
     let mut input = String::new();
-    print!("Are you Player_X (1) or Player_O (2)? type 1 or 2:");
-    print!("!!! Make sure Player_O is online before Player_1 for technical reasons !!! ");
+    println!("Are you Player_X (1) or Player_O (2)? type 1 or 2:");
+    println!("!!! Make sure Player_O is online before Player_1 for technical reasons !!! ");
     stdout().flush().unwrap(); 
     stdin().read_line(&mut input).unwrap();
     let number: usize = input.trim().parse().expect("parsing error");
@@ -97,6 +99,7 @@ fn main() {
                continue
             }
             else{
+               graphics(&game);
                println!("This match's winner is {win}");
                break
             }
@@ -154,7 +157,7 @@ fn winner_gets_the_dinner<'a>(game: &'a [[&str;3];3]) -> &'a str {
           game[1][1]
        } else if game[2][2] != "_" && game[2][2] == game[2][0] && game[2][2] == game[2][1] && game[2][2] != "_" {
          game[2][2]
-       } else if game[2][2] != "_" && game[2][2] == game[0][2] && game[2][2] == game[0][1] {
+       } else if game[2][2] != "_" && game[2][2] == game[0][2] && game[2][2] == game[2][1] {
          game[2][2]
        } else {
          "NO_WINNER"
