@@ -1,24 +1,36 @@
 use std::io::*;
-//use crate::online::connection;
-
-//pub mod online;
 
 
-fn user_input() -> (usize, usize) {
-        let mut inputx = String::new();
-        stdin().read_line(&mut inputx).unwrap();
-        let my_x: usize = inputx.trim().parse().expect("parsing error");
+use crate::online::*;
+
+pub mod online;
+
+
+fn user_input(user: &str) -> (usize, usize) {
+        if user == "you" {
+            println!("Type the location(0-> initial to 2 for the both numbers): ");
+            let mut inputx = String::new();
+            stdin().read_line(&mut inputx).unwrap();
+            let my_x: usize = inputx.trim().parse().expect("parsing error");
     
-        let mut inputy = String::new();
-        stdin().read_line(&mut inputy).unwrap();
-        let my_y: usize = inputy.trim().parse().expect("parsing error");
-        (my_x, my_y)
+            let mut inputy = String::new();
+            stdin().read_line(&mut inputy).unwrap();
+            let my_y: usize = inputy.trim().parse().expect("parsing error");
+            let _ = client(&my_x,&my_y);
+            (my_x, my_y)
+        } else {
+            println!("Waiting for the other user --> ");
+
+            let (it_x,it_y) = server();
+
+            (it_x,it_y)
+        }
 }
 
 fn graphics(game:&[[&str; 3];3 ]) {
     for i  in 0..game.len(){
         let mut a = String::new();
-        a.push_str("|");
+        a.push_str("------> |");
         for j  in 0..game[0].len() {
             a.push_str(game[i][j]);
             a.push_str("|");
@@ -26,6 +38,7 @@ fn graphics(game:&[[&str; 3];3 ]) {
         println!("{a}")
 
     }
+    println!("________-________");
 }
 
 
@@ -37,37 +50,61 @@ fn graphics(game:&[[&str; 3];3 ]) {
 
 
 fn main() {
-    
+    let mut turn: &str = "you";
     let mut player: &str = "X";
+    let mut input = String::new();
+    print!("Are you Player_X (1) or Player_O (2)? type 1 or 2:");
+    print!("!!! Make sure Player_O is online before Player_1 for technical reasons !!! ");
+    stdout().flush().unwrap(); 
+    stdin().read_line(&mut input).unwrap();
+    let number: usize = input.trim().parse().expect("parsing error");
+    if number == 2 {
+       turn = "it";
+    }
+
     let mut game: [[&str; 3]; 3] = [["_","_","_"],["_","_","_"],["_","_","_"]];
     let mut i = 0;
+    let mut win = "NO_WINNER";
     while i < 9 {
-        graphics(&game);
-        let (row,col) = user_input();
-        if game[row][col] == "_" {
-            if player== "X" {
-                game[row][col] = "X";
-                player = "O";
+            graphics(&game);
+            let (row,col) = user_input(&turn);
+            if game[row][col] == "_" {
+                if player== "X" {
+                   game[row][col] = "X";
+                   player = "O";
+                   if turn == "you" {
+                    turn = "it"
+                   } else {
+                    turn = "you"
+                   }
+                }
+                else {
+                    game[row][col] = "O";
+                    player = "X";
+                    if turn == "you" {
+                        turn = "it"
+                    } else {
+                        turn = "you"
+                    }
+                }
             }
             else {
-                game[row][col] = "O";
-                player = "X";
+               println!("This invalid move {row} and {col} is occupied");
             }
-        }
-        else {
-            println!("This invalid move {row} and {col} is occupied");
-        }
-        let win = winner_gets_the_dinner(&game);
-        if win == "NO_WINNER" {
-            i += 1;
-            continue
-        }
-        else {
-            println!("This match's winner is {win}");
-            break
-        }
+            win = winner_gets_the_dinner(&game);
+            if win == "NO_WINNER" {
+               i += 1;
+               continue
+            }
+            else{
+               println!("This match's winner is {win}");
+               break
+            }
+            
     }
-    println!("This match has $NO_WINNERS, its a t-i-e. :( ");
+    if win == "NO_WINNER" {
+        println!("This match has $NO_WINNERS, its a t-i-e. :( ");
+    }
 }
 
 

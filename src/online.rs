@@ -1,58 +1,55 @@
 use std::{
-    io,
     io::Error,
-    io::{prelude::*, BufReader},
+    io::prelude::*,
     net::{TcpListener, TcpStream},
+    thread,
+    time::Duration
+
 };
 
 
 
-pub fn server() {
+pub fn server()-> (usize, usize) {
+    thread::sleep(Duration::from_secs(5));
+    // this ensures that two cennections dont interrupt each other while changing tasks
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
-    println!("started to listen for connections in 127.0.0.1:7878");
+    println!("Started to listen-->");
+    let mut my_x: usize = 3;
+    let mut my_y: usize = 3;
     for stream in listener.incoming() {
         let mut stream = stream.unwrap();
-        let mut number = [0;4];
-        stream.read_exact(&mut number).unwrap();
-        let number: i32 = i32::from_be_bytes(number);
-        println!("{number}");
-        stream.write_all(&[number as u8; 4]).unwrap();
+
+        // Buffer to hold the received data (16 bytes for two usize values)
+        let mut buffer = [0; 16];
+        stream.read_exact(&mut buffer).unwrap();
+
+        // Convert bytes to usize values
+        my_x = usize::from_be_bytes(buffer[0..8].try_into().unwrap());
+        my_y = usize::from_be_bytes(buffer[8..16].try_into().unwrap());
+        if my_x > 0 && my_y < 2  {
+            break;
+        }   
     }
+    (my_x,my_y)
 }
 
-
-pub fn client() -> Result<(), Error> {
+pub fn client(my_x: &usize, my_y: &usize) -> Result<(), Error> {
     let mut stream = TcpStream::connect("127.0.0.1:7878")?;
-    println!("Connected to server at 127.0.0.1:7878!");
+    println!("Sending data_>");
 
-    let number: i32 = 123; // The integer to send
-    let mut buffer = number.to_be_bytes(); // Convert integer to bytes (big-endian)
+    // Convert usize values to bytes
+    let my_x_bytes = my_x.to_be_bytes();
+    let my_y_bytes = my_y.to_be_bytes();
+
+    // Create a buffer to hold both values
+    let mut buffer = Vec::new();
+    buffer.extend_from_slice(&my_x_bytes);
+    buffer.extend_from_slice(&my_y_bytes);
+
+    // Send the buffer to the server
     stream.write_all(&buffer)?;
+    
 
-    println!("Sent number: {}", number);
-
-    let mut response = [0; 4]; // Buffer to hold the response
-    stream.read_exact(&mut response)?;
-
-    let response: i32 = i32::from_be_bytes(response); // Convert bytes to integer
-    println!("Received response: {}", response);
-
+    
     Ok(())
-}
-
-
-pub fn connection() {
-    let mut input = String::new();
-    print!("Are you $SERVER(1) or $CLIENT(2)? type 1 or 2: ");
-    io::stdout().flush().unwrap(); 
-    io::stdin().read_line(&mut input).unwrap();
-    let number: usize = input.trim().parse().expect("parsing error");
-    if  number == 1{
-        server();
-    }
-    else if  number == 2{
-        let _ = client();
-    } else {
-        println!("Invalid response please type 1 or 2 -> {number}")
-    }
 }
